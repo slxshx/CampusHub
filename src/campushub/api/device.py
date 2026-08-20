@@ -1,24 +1,25 @@
 from fastapi import APIRouter
+from ..models.device import Device
 
 device_router = APIRouter()
 
-@device_router.get("/device", tags=["device"])
+@device_router.get("/device", response_model=list[Device])
 async def get_devices():
     return [
             {
                 "host_name": "router_01",
                 "host_ip": "192.168.178.10",
-                "cpu": "31%",
-                "ram": "67%",
-                "interface_status": "Online",
-                "uptime": "7h 13m 54s",
+                "cpu": 31.2,
+                "ram": 88.2,
+                "interfaces": ["g0/0", "g0/1"],
+                "uptime": 2321,
             },
-            {
+                        {
                 "host_name": "router_02",
                 "host_ip": "192.168.178.20",
-                "cpu": "12%",
-                "ram": "16%",
-                "interface_status": "Online",
-                "uptime": "3h 26m 12s",
-            }
+                "cpu": 11.8,
+                "ram": 88.2,
+                "interfaces": ["g0/0", "g0/1"],
+                "uptime": 1002,
+            },
         ]
