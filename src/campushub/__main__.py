@@ -1,8 +1,9 @@
 from fastapi import FastAPI
+from .api.health import health_router
+from .api.device import device_router
 
 app = FastAPI()
 
+app.include_router(health_router)
+app.include_router(device_router)
 
-@app.get("/health")
-async def root():
-    return {"status": "Ok"}
