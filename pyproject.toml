@@ -7,7 +7,10 @@ authors = [
     { name = "slxshx", email = "leon.linss@outlook.de" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi>=0.141.1",
+    "uvicorn>=0.52.4",
+]
 
 [project.scripts]
 campushub = "campushub:main"
