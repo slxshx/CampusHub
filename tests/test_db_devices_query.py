@@ -1,5 +1,5 @@
-from campushub.repositories.device_repository import get_all_devices
+from campushub.repositories.device_repository import DeviceRepository
+repo = DeviceRepository()
+result = DeviceRepository.get_all_devices(repo)
 
-devices = get_all_devices()
-
-print(devices)
+print(result)
