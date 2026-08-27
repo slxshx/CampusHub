@@ -65,6 +65,7 @@ class BaseRepository():
             with connection.cursor(row_factory=dict_row) as cursor:
 
                 data = input_model.model_dump()
+                
                 keys = data.keys()
                 values = tuple(data.values())
                 placeholder_count = len(keys)
@@ -98,3 +99,41 @@ class BaseRepository():
                     return None
 
                 return output_model(**result)
+
+    def update(self, entity_id, input_model, table) -> bool:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+
+                data = input_model.model_dump(exclude_unset=True)
+
+                if not data:
+                    return False
+
+                values = tuple(data.values())
+
+                set_parts = []
+
+                for key in data.keys():
+                    set_parts.append(SQL("{} = {}").format(
+                        
+                            Identifier(key),
+                            Placeholder()
+                            ))
+
+                set_sql = SQL(", ").join(set_parts)
+
+                query = SQL("UPDATE {} SET {} WHERE id = %s").format(
+                        Identifier(table),
+                        set_sql
+                        )
+
+                parameters = values + (entity_id,)
+
+                cursor.execute(query, parameters)
+
+                result = cursor.rowcount
+
+                if result > 0:
+                    return True
+
+                return False
