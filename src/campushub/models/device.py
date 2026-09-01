@@ -14,9 +14,9 @@ class CreateDevice(BaseModel):
     TABLE_NAME: ClassVar[str] = "devices"
 
     hostname: str
-    description: str | None
+    description: str | None = None
     device_type: str
-    location: str | None
+    location: str | None = None
 
 class UpdateDevice(BaseModel):
     TABLE_NAME: ClassVar[str] = "devices"
