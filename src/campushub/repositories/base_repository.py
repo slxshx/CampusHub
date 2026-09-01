@@ -1,10 +1,14 @@
 from psycopg.rows import dict_row
-from psycopg.sql import SQL, Identifier
+from psycopg.sql import SQL, Composable, Identifier, Placeholder
 from ..database.connection import get_connection
-from psycopg.sql import Placeholder
+from typing import TypeVar
+from pydantic import BaseModel
+
+T = TypeVar("T", bound=BaseModel)
+TOutput = TypeVar("TOutput", bound=BaseModel)
 
 class BaseRepository():
-    def get_all(self, model, table):
+    def get_all(self, model: type[T], table: str) -> list[T]:
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
 
@@ -12,11 +16,11 @@ class BaseRepository():
                         Identifier(table)
                         )
 
-                cursor.execute(query)
+                _ = cursor.execute(query)
 
                 results = cursor.fetchall()
 
-                data = []
+                data: list[T] = []
 
                 for result in results:
                     row = model(**result)
@@ -24,7 +28,7 @@ class BaseRepository():
 
                 return data
 
-    def get_by_id(self, entity_id, model, table):
+    def get_by_id(self, entity_id: int, model: type[T], table: str) -> T | None:
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
 
@@ -32,7 +36,7 @@ class BaseRepository():
                         Identifier(table)
                         )
 
-                cursor.execute(query, (entity_id,))
+                _ = cursor.execute(query, (entity_id,))
 
                 result = cursor.fetchone()
 
@@ -43,7 +47,7 @@ class BaseRepository():
 
                 return data
 
-    def delete_by_id(self, entity_id, table) -> bool:
+    def delete_by_id(self, entity_id: int, table: str) -> bool:
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
 
@@ -51,7 +55,7 @@ class BaseRepository():
                         Identifier(table)
                         )
 
-                cursor.execute(query, (entity_id,))
+                _ = cursor.execute(query, (entity_id,))
 
                 result = cursor.rowcount
 
@@ -60,7 +64,7 @@ class BaseRepository():
 
                 return False
 
-    def create(self, input_model, output_model, table):
+    def create(self, input_model: BaseModel, output_model: type[TOutput], table: str) -> TOutput | None:
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
 
@@ -70,14 +74,14 @@ class BaseRepository():
                 values = tuple(data.values())
                 placeholder_count = len(keys)
 
-                placeholders = []
+                placeholders: list[Composable] = []
 
                 for _ in range(placeholder_count):
                     placeholders.append(Placeholder())
 
                 placeholder_sql = SQL(', ').join(placeholders)
 
-                columns = []
+                columns: list[Composable] = []
 
                 for key in keys:
                     columns.append(Identifier(key))
@@ -91,7 +95,7 @@ class BaseRepository():
                         placeholder_sql
                         )
 
-                cursor.execute(query, values)
+                _ = cursor.execute(query, values)
 
                 result = cursor.fetchone()
 
@@ -100,7 +104,7 @@ class BaseRepository():
 
                 return output_model(**result)
 
-    def update(self, entity_id, input_model, table) -> bool:
+    def update(self, entity_id: int, input_model: BaseModel, table: str) -> bool:
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
 
@@ -111,7 +115,7 @@ class BaseRepository():
 
                 values = tuple(data.values())
 
-                set_parts = []
+                set_parts: list[Composable] = []
 
                 for key in data.keys():
                     set_parts.append(SQL("{} = {}").format(
@@ -129,7 +133,7 @@ class BaseRepository():
 
                 parameters = values + (entity_id,)
 
-                cursor.execute(query, parameters)
+                _ = cursor.execute(query, parameters)
 
                 result = cursor.rowcount
 
