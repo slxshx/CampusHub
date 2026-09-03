@@ -2,9 +2,9 @@ from psycopg import Connection, connect
 from ..config.settings import Settings
 
 
-settings = Settings()
 
 def get_connection() -> Connection:
+    settings = Settings()
     return connect(
             host=settings.db_host,
             port=settings.db_port,

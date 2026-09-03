@@ -1,4 +1,4 @@
-from campushub.models.device import CreateDevice
+from campushub.models.device import CreateDevice, UpdateDevice
 import pytest
 from pydantic import ValidationError
 
@@ -80,4 +80,44 @@ def test_create_device_without_type_fails():
                 location="Besenkammer 1"
                 )
 
+def test_update_device_fully():
+    update_device = UpdateDevice(
+            hostname="Server 3",
+            description="Update ist durch.",
+            device_type="Server",
+            location="Campus 3 Gebäude 2"
+            )
+
+    data = update_device.model_dump(exclude_unset=True)
+
+    assert data == {"hostname": "Server 3",
+                    "description": "Update ist durch.",
+                    "device_type": "Server",
+                    "location": "Campus 3 Gebäude 2"}
+
+
+def test_update_device_one_parameter():
+    update_device = UpdateDevice(
+            hostname="Client"
+            )
+
+    data = update_device.model_dump(exclude_unset=True)
+
+    assert data == {"hostname": "Client"}
+
+def test_update_without_parameters():
+    update_device = UpdateDevice()
+
+    data = update_device.model_dump(exclude_unset=True)
+
+    assert data == {}
+
+def test_update_explicit_none():
+    update_device = UpdateDevice(
+            device_type=None
+            )
+
+    data = update_device.model_dump(exclude_unset=True)
+
+    assert data == {"device_type": None}
 
