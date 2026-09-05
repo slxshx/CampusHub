@@ -13,3 +13,8 @@ wheels/
 .env
 .env.*
 !.env.example
+nginx/campushub.local.conf
+
+# Windows kram
+.tools/
+

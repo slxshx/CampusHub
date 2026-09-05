@@ -1,79 +1,95 @@
 # CampusHub
 
-```text
- _____                                  _   _       _     
-/  __ \                                | | | |     | |    
-| /  \/ __ _ _ __ ___  _ __  _   _ ___ | |_| |_   _| |__  
-| |    / _` | '_ ` _ \| '_ \| | | / __||  _  | | | | '_ \ 
-| \__/\ (_| | | | | | | |_) | |_| \__ \| | | | |_| | |_) |
- \____/\__,_|_| |_| |_| .__/ \__,_|___/\_| |_/\__,_|_.__/ 
-                      | |                                 
-                      |_|                                 
-```
+CampusHub ist ein schulisches Monitoring- und Logging-System für Netzwerk- und Server-Infrastruktur.
 
-> Central infrastructure data and monitoring platform for a multi-campus network.
+## Architektur
 
----
+CampusHub besteht aus:
 
-## About
+- Nginx als zentralem Einstiegspunkt
+- einem statischen HTML/CSS/JS-Frontend
+- einem FastAPI-Backend
+- PostgreSQL als Datenbank
 
-CampusHub is a modular backend application for collecting, storing and providing infrastructure data across multiple network environments.
+Ablauf:
 
-```text
-Infrastructure
-      |
-      v
-+-------------+
-|  CampusHub  |
-+------+------+
-       |
-   +---+---+
-   |       |
-   v       v
- Data     API
-```
+Browser → Nginx → Frontend oder `/api/...` → FastAPI → PostgreSQL
 
-The project focuses on:
+Das Frontend verwendet ausschließlich relative API-Pfade wie:
 
-* centralized infrastructure data
-* logging and monitoring
-* clean system interfaces
-* modular architecture
-* secure data handling
+`/api/devices`
 
----
+Dadurch bleibt das Routing lokal und später im Deployment gleich.
 
-## Stack
+## Projektstruktur
 
-```text
-Python
-uv
-Database
-REST API
-```
+- `backend/` – FastAPI, Models, Repositories, Services, Collector, Tests
+- `frontend/` – HTML, CSS, JavaScript
+- `nginx/` – Nginx-Konfiguration
+- `scripts/` – Setup-, Start- und Stop-Scripts
+- `docs/` – technische Dokumentation
 
-The final technology stack and architecture are currently under development.
+## Lokales Setup
 
----
+Die vollständige Anleitung befindet sich unter:
 
-## Development
+`docs/development/setup.md`
 
-```bash
-git clone https://github.com/slxshx/CampusHub.git
-cd CampusHub
+Einmalige Einrichtung:
 
-uv sync
-```
+macOS:
+`./scripts/setup-macos.sh`
 
----
+Linux:
+`./scripts/setup-linux.sh`
 
-## Status
+Windows:
+`.\scripts\setup-windows.ps1`
 
-```text
-project : CampusHub
-state   : development
-```
+## Entwicklung starten
 
-Developed as part of a vocational IT infrastructure project.
+macOS:
+`./scripts/dev-start-macos.sh`
 
----
+Linux:
+`./scripts/dev-start-linux.sh`
+
+Windows:
+`.\scripts\dev-start-windows.ps1`
+
+Danach:
+
+- CampusHub: `http://localhost:8081`
+- Health Check: `http://localhost:8081/api/health`
+- Swagger: `http://localhost:8081/api/docs`
+
+## Entwicklung stoppen
+
+macOS:
+`./scripts/dev-stop-macos.sh`
+
+Linux:
+`./scripts/dev-stop-linux.sh`
+
+Windows:
+`.\scripts\dev-stop-windows.ps1`
+
+## Tests
+
+Die Tests befinden sich unter `backend/tests/`.
+
+Ausführen:
+
+`cd backend`
+`uv run pytest`
+
+Für Integrationstests wird die separate Datenbank `campushub_test` verwendet.
+
+## Wichtige Regeln
+
+- Frontend greift niemals direkt auf PostgreSQL zu.
+- Frontend verwendet nur `/api/...`.
+- Datenbankzugriffe laufen über Repositories.
+- Business-Logik gehört in Services.
+- Collector sollen keine SQL-Logik enthalten.
+- `.env` und andere lokale Geheimnisse werden nicht committed.
