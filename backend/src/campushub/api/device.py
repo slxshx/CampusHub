@@ -6,20 +6,25 @@ device_router = APIRouter()
 @device_router.get("/device", response_model=list[Device])
 async def get_devices():
     return [
-            {
-                "host_name": "router_01",
-                "host_ip": "192.168.178.10",
-                "cpu": 31.2,
-                "ram": 88.2,
-                "interfaces": ["g0/0", "g0/1"],
-                "uptime": 2321,
+            { 
+                "id": 1,
+                "hostname": "Test-Server",
+                "description": "Kannst du mich sehen?",
+                "device_type": "Server",
+                "location": "Campussi",
             },
-                        {
-                "host_name": "router_02",
-                "host_ip": "192.168.178.20",
-                "cpu": 11.8,
-                "ram": 88.2,
-                "interfaces": ["g0/0", "g0/1"],
-                "uptime": 1002,
+            {
+                "id": 2,
+                "hostname": "Test-Switch",
+                "description": "Kannst du mich sehen?",
+                "device_type": "Switch",
+                "location": "Campussi",
             },
         ]
+
+
+    id: int
+    hostname: str
+    description: str | None = None
+    device_type: str
+    location: str | None = None
