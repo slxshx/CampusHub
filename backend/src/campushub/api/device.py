@@ -21,10 +21,3 @@ async def get_devices():
                 "location": "Campussi",
             },
         ]
-
-
-    id: int
-    hostname: str
-    description: str | None = None
-    device_type: str
-    location: str | None = None
