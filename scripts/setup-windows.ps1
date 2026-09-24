@@ -114,6 +114,7 @@ if (-not $Psql) {
     winget install `
         --id PostgreSQL.PostgreSQL.17 `
         -e `
+        --interactive `
         --accept-package-agreements `
         --accept-source-agreements
 
