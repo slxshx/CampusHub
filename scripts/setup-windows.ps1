@@ -60,7 +60,7 @@ if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     exit 0
 }
 
-Write-Host "✓ Python gefunden"
+Write-Host "[OK] Python gefunden"
 Write-Host ""
 
 # --------------------------------------------------
