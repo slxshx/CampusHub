@@ -11,7 +11,7 @@ $NginxHome = Join-Path $ProjectRoot ".tools\nginx"
 $NginxExe = Join-Path $NginxHome "nginx.exe"
 
 
-Write-Host "[1/3] Prüfe PostgreSQL..."
+Write-Host "[1/3] Pruefe PostgreSQL..."
 
 $PostgresService = Get-Service |
     Where-Object {
@@ -21,7 +21,7 @@ $PostgresService = Get-Service |
 
 if (-not $PostgresService) {
     Write-Host "FEHLER: PostgreSQL-Service wurde nicht gefunden."
-    Write-Host "Bitte zuerst setup-windows.ps1 ausführen."
+    Write-Host "Bitte zuerst setup-windows.ps1 ausfuehren."
     exit 1
 }
 
@@ -29,7 +29,7 @@ if ($PostgresService.Status -ne "Running") {
     Start-Service $PostgresService.Name
 }
 
-Write-Host "✓ PostgreSQL läuft"
+Write-Host "[OK] PostgreSQL laeuft"
 Write-Host ""
 
 
@@ -37,7 +37,7 @@ Write-Host "[2/3] Starte / lade Nginx..."
 
 if (-not (Test-Path $NginxExe)) {
     Write-Host "FEHLER: Nginx wurde nicht gefunden."
-    Write-Host "Bitte zuerst setup-windows.ps1 ausführen."
+    Write-Host "Bitte zuerst setup-windows.ps1 ausfuehren."
     exit 1
 }
 
@@ -49,14 +49,13 @@ $NginxRunning = Get-Process nginx -ErrorAction SilentlyContinue
 
 if ($NginxRunning) {
     & $NginxExe -s reload
-
-    Write-Host "✓ Nginx neu geladen"
+    Write-Host "[OK] Nginx neu geladen"
 }
 else {
     Start-Process $NginxExe `
         -WorkingDirectory $NginxHome
 
-    Write-Host "✓ Nginx gestartet"
+    Write-Host "[OK] Nginx gestartet"
 }
 
 Pop-Location
