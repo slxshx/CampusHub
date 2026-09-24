@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geräte</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="sidebar">
+
+            <a class="btn" onclick="zeigePC1()">PC-01</a>
+            <a class="btn" onclick="zeigePC2()">PC-02</a>
+            <a class="btn" onclick="zeigeLaptop()">Laptop-01</a>
+            <a class="btn" onclick="zeigeServer()">Server-01</a>
+            <a class="btn" onclick="zeige111()">Computer VLAN 111</a>
+            <a class="btn" onclick="zeige112()">Computer VLAN 112</a>
+            <a class="btn" onclick="zeige121()">Computer VLAN 121</a>
+            <a class="btn" onclick="zeige122()">Computer VLAN 122</a>
+
+        </div>
+
+        <div class="content">
+
+            <h2 id="geraetename">PC-01</h2>
+
+            <p id="hostname">Hostname: PC-01</p>
+            <p id="ip">IP-Adresse: 192.168.1.10</p>
+            <p id="os">Betriebssystem: Windows 11 Pro</p>
+            <p id="cpu">CPU: Intel Core i5-12400</p>
+            <p id="ram">RAM: 16 GB</p>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function zeigePC1() {
+            document.getElementById("geraetename").innerHTML = "PC-01";
+            document.getElementById("hostname").innerHTML = "Hostname: PC-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.10";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Pro";
+            document.getElementById("cpu").innerHTML = "CPU: Intel Core i5-12400";
+            document.getElementById("ram").innerHTML = "RAM: 16 GB";
+        }
+
+        function zeigePC2() {
+            document.getElementById("geraetename").innerHTML = "PC-02";
+            document.getElementById("hostname").innerHTML = "Hostname: PC-02";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.11";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 10 Pro";
+            document.getElementById("cpu").innerHTML = "CPU: AMD Ryzen 5 5600";
+            document.getElementById("ram").innerHTML = "RAM: 32 GB";
+        }
+
+        function zeigeLaptop() {
+            document.getElementById("geraetename").innerHTML = "Laptop-01";
+            document.getElementById("hostname").innerHTML = "Hostname: Laptop-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.20";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11";
+            document.getElementById("cpu").innerHTML = "CPU: Intel Core i7-1360P";
+            document.getElementById("ram").innerHTML = "RAM: 16 GB";
+        }
+
+        function zeigeServer() {
+            document.getElementById("geraetename").innerHTML = "Server-01";
+            document.getElementById("hostname").innerHTML = "Hostname: Server-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.100";
+            document.getElementById("os").innerHTML = "Windows Server 2022";
+            document.getElementById("cpu").innerHTML = "CPU: Xeon E-2388G";
+            document.getElementById("ram").innerHTML = "RAM: 64 GB";
+        }
+        function zeige111() {
+            document.getElementById("geraetename").innerHTML = "Computer VLAN 112";
+            document.getElementById("hostname").innerHTML = "Hostname: PC-111-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.112.10";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 10 Pro";
+            document.getElementById("cpu").innerHTML = "CPU: AMD Ryzen 5 5600";
+            document.getElementById("ram").innerHTML = "RAM: 32 GB";
+        }
+        function zeige112() {
+            document.getElementById("geraetename").innerHTML = "Computer VLAN 112";
+            document.getElementById("hostname").innerHTML = "Hostname: PC-112-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.112.10";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Pro";
+            document.getElementById("cpu").innerHTML = "CPU: AMD Ryzen 7 5800X";
+            document.getElementById("ram").innerHTML = "RAM: 32 GB";
+
+            document.getElementById("mac").innerHTML = "MAC-Adresse: 00:1B:44:11:3A:B7";
+            document.getElementById("user").innerHTML = "Angemeldeter Benutzer: Max Mustermann";
+            document.getElementById("storage").innerHTML = "Freier Speicher: 412 GB / 1 TB";
+            document.getElementById("switch").innerHTML = "Switch Status: Online";
+            document.getElementById("server").innerHTML = "Zugeordneter Server: SRV-APP-01";
+            document.getElementById("serverload").innerHTML = "Serverauslastung: 37 %";
+            document.getElementById("services").innerHTML = "Dienste: DNS, DHCP, Fileservice";
+            document.getElementById("uptime").innerHTML = "Uptime: 12 Tage 4 Stunden";
+            document.getElementById("ping").innerHTML = "Ping: 2 ms";
+            document.getElementById("vlan").innerHTML = "VLAN: 112";
+        }
+        function zeige121() {
+            document.getElementById("geraetename").innerHTML = "Computer VLAN 121";
+            document.getElementById("hostname").innerHTML = "Hostname: PC-121-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.121.10";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Enterprise";
+            document.getElementById("cpu").innerHTML = "CPU: Intel Core i7-13700";
+            document.getElementById("ram").innerHTML = "RAM: 32 GB";
+        }
+        function zeige122() {
+            document.getElementById("geraetename").innerHTML = "Computer VLAN 122";
+            document.getElementById("hostname").innerHTML = "Hostname: PC-122-01";
+            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.122.10";
+            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Pro";
+            document.getElementById("cpu").innerHTML = "CPU: Intel Core i9-14900K";
+            document.getElementById("ram").innerHTML = "RAM: 64 GB";
+        }
+
+
+    </script>
+    <button onclick="history.back()" class="back-btn">Zurück</button>
+
+    <style>
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 9999;
+        }
+
+            .back-btn:hover {
+                background-color: #218838;
+            }
+    </style>
+
+
+</body>
+</html>
