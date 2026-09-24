@@ -36,7 +36,7 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-Write-Host "✓ WinGet gefunden"
+Write-Host "[OK] WinGet gefunden"
 Write-Host ""
 
 # --------------------------------------------------
@@ -84,7 +84,7 @@ if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
     exit 0
 }
 
-Write-Host "✓ uv gefunden"
+Write-Host "[OK] uv gefunden"
 Write-Host ""
 
 # --------------------------------------------------
@@ -130,7 +130,7 @@ else {
     $PsqlExe = $Psql
 }
 
-Write-Host "✓ PostgreSQL gefunden"
+Write-Host "[OK] PostgreSQL gefunden"
 Write-Host ""
 
 # --------------------------------------------------
@@ -147,7 +147,7 @@ if (-not (Test-Path $EnvFile)) {
 
     Copy-Item $EnvExample $EnvFile
 
-    Write-Host "✓ backend/.env wurde erstellt"
+    Write-Host "[OK] backend/.env wurde erstellt"
     Write-Host ""
     Write-Host "Bitte DB_PASSWORD in backend/.env setzen."
     Write-Host "Danach Setup erneut starten."
@@ -159,7 +159,7 @@ Push-Location $BackendDir
 uv sync
 Pop-Location
 
-Write-Host "✓ Backend-Abhängigkeiten installiert"
+Write-Host "[OK] Backend-Abhängigkeiten installiert"
 Write-Host ""
 
 # --------------------------------------------------
@@ -219,7 +219,7 @@ $RoleExists = & $PsqlExe `
     -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DbUser'"
 
 if ($RoleExists -match "1") {
-    Write-Host "✓ Rolle '$DbUser' existiert bereits"
+    Write-Host "[OK] Rolle '$DbUser' existiert bereits"
 }
 else {
     & $PsqlExe `
@@ -227,7 +227,7 @@ else {
         -h localhost `
         -c "CREATE ROLE $DbUser WITH LOGIN PASSWORD '$DbPassword';"
 
-    Write-Host "✓ Rolle '$DbUser' erstellt"
+    Write-Host "[OK] Rolle '$DbUser' erstellt"
 }
 
 foreach ($Database in @($DbName, $TestDbName)) {
@@ -238,7 +238,7 @@ foreach ($Database in @($DbName, $TestDbName)) {
         -tAc "SELECT 1 FROM pg_database WHERE datname='$Database'"
 
     if ($DatabaseExists -match "1") {
-        Write-Host "✓ Datenbank '$Database' existiert bereits"
+        Write-Host "[OK] Datenbank '$Database' existiert bereits"
     }
     else {
         & $PsqlExe `
@@ -246,7 +246,7 @@ foreach ($Database in @($DbName, $TestDbName)) {
             -h localhost `
             -c "CREATE DATABASE $Database OWNER $DbUser;"
 
-        Write-Host "✓ Datenbank '$Database' erstellt"
+        Write-Host "[OK] Datenbank '$Database' erstellt"
     }
 }
 
@@ -269,7 +269,7 @@ foreach ($Database in @($DbName, $TestDbName)) {
         -tAc "SELECT to_regclass('public.devices');"
 
     if ($SchemaExists -match "devices") {
-        Write-Host "✓ Schema in '$Database' bereits vorhanden"
+        Write-Host "[OK] Schema in '$Database' bereits vorhanden"
     }
     else {
         & $PsqlExe `
@@ -279,7 +279,7 @@ foreach ($Database in @($DbName, $TestDbName)) {
             -d $Database `
             -f $SchemaFile
 
-        Write-Host "✓ Schema in '$Database' importiert"
+        Write-Host "[OK] Schema in '$Database' importiert"
     }
 }
 
@@ -316,7 +316,7 @@ if (-not (Test-Path $NginxHome)) {
 
     Remove-Item $NginxZip
 
-    Write-Host "✓ Nginx heruntergeladen"
+    Write-Host "[OK] Nginx heruntergeladen"
 }
 
 $FrontendPath = (
@@ -377,13 +377,13 @@ $Running = Get-Process nginx -ErrorAction SilentlyContinue
 
 if ($Running) {
     & $NginxExe -s reload
-    Write-Host "✓ Nginx neu geladen"
+    Write-Host "[OK] Nginx neu geladen"
 }
 else {
     Start-Process $NginxExe `
         -WorkingDirectory $NginxHome
 
-    Write-Host "✓ Nginx gestartet"
+    Write-Host "[OK] Nginx gestartet"
 }
 
 Pop-Location
