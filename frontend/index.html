@@ -3,23 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Netzwerk</title>
+    <title>Lab Netzwerk-Verwaltung</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="center-box">
-        <h2>Netzwerkverwaltung</h2>
-        <ul class="button-list">
-            <ul class="button-list">
-        <ul class="button-list">
-            <li><a href="geraete.html" class="btn">Geräte</a></li>
-            <li><a href="campus.html" class="btn">Campus</a></li>
-            <li><a href="netzstruktur.html" class</li>
-            <li><a href="einstellungen.html" class="btn">Einstellungen</a></li>
-           </ul>
-        </ul>
+    <div class="dashboard-wrapper">
+
+        <header class="box-menu">
+            <div class="menu-btn active" onclick="window.location.href='index.html'">Übersicht</div>
+            <div class="menu-btn" onclick="window.location.href='campus/campus1.html'">Campus 1</div>
+            <div class="menu-btn" onclick="window.location.href='campus/campus2.html'">Campus 2</div>
+            <div class="menu-btn" onclick="window.location.href='geraete.html'">Geräte</div>
+        </header>
+
+        <div class="network-box">
+            <div class="box-content-wrapper">
+                <div class="content-panel active">
+                    <div class="welcome-banner">
+                        <h2>Zentrales Lab Dashboard</h2>
+                    </div>
+                    <div class="quick-status-grid">
+                        <div class="status-mini-card">
+                            <span>Campus 1 Status:</span>
+                            <span class="status online">Normalbetrieb</span>
+                        </div>
+                        <div class="status-mini-card">
+                            <span>Campus 2 Status:</span>
+                            <span class="status online">Bereit</span>
+                        </div>
+                        <div class="status-mini-card">
+                            <span>Aktive VLANs im Lab:</span>
+                            <div class="vlan-tags-container">
+                                <span class="vlan-tag">VLAN 111</span>
+                                <span class="vlan-tag">VLAN 112</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </body>
 </html>
-hahah

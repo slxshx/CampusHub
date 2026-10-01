@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus 1</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <header class="box-menu">
+            <div class="menu-btn" onclick="window.location.href='../index.html'">Übersicht</div>
+            <div class="menu-btn active" onclick="window.location.href='campus1.html'">Campus 1</div>
+            <div class="menu-btn" onclick="window.location.href='campus2.html'">Campus 2</div>
+            <div class="menu-btn" onclick="window.location.href='../geraete.html'">Geräte</div>
+        </header>
+
+        <div class="network-box">
+            <div class="box-content-wrapper">
+                <div class="content-panel active">
+
+                    <div class="welcome-banner blue-gradient">
+                        <h2>Campus 1 - Core und Datacenter</h2>
+                        <p>Kern-Infrastruktur, Proxmox-Cluster und Client-Zuweisungen</p>
+                    </div>
+
+                    <div class="campus-inner-box">
+                        <div class="info-group">
+                            <h4>Externe Gateways</h4>
+                            <div class="row"><span>Router Extern (Hauptleitung)</span><span class="status online">Online</span></div>
+                            <div class="row"><span>Router Extern (Brücke / Ausfallsicher)</span><span class="status standby">Standby</span></div>
+                        </div>
+
+                        <div class="info-group">
+                            <h4>Zentraler Switch 1 und Proxmox VE</h4>
+                            <div class="row"><span>Management Switch 1</span><span class="status online">Online</span></div>
+                            <div class="pve-node"><strong>Node 1:</strong> DNS-Server (VM) <span class="ip">192.168.1.53</span></div>
+                            <div class="pve-node"><strong>Node 2:</strong> Dashboard-App (VM) <span class="ip">192.168.1.80</span></div>
+                            <div class="pve-node"><strong>Node 3:</strong> Dash-DB (Datenbank) <span class="ip">192.168.1.81</span></div>
+                        </div>
+
+                        <div class="info-group">
+                            <h4>Campus-Zubringer und Access-Switches</h4>
+                            <div class="row"><span>Verbindungs-Router Intern</span><span class="status online">Verbunden</span></div>
+                            <div class="row"><span>Management Switch 2 (Campus)</span><span class="status online">Online</span></div>
+                            <div class="row"><span>Gebäude A (Access-Switch GebA)</span><span class="status online">Aktiv</span></div>
+                            <div class="row"><span>Gebäude B (Access-Switch GebB)</span><span class="status online">Aktiv</span></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

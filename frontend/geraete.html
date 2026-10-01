@@ -3,145 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geräte</title>
+    <title>Geräteliste</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="container">
+    <div class="dashboard-wrapper">
 
-        <div class="sidebar">
+        <header class="box-menu">
+            <div class="menu-btn" onclick="window.location.href='index.html'">Übersicht</div>
+            <div class="menu-btn" onclick="window.location.href='campus/campus1.html'">Campus 1</div>
+            <div class="menu-btn" onclick="window.location.href='campus/campus2.html'">Campus 2</div>
+            <div class="menu-btn active" onclick="window.location.href='geraete.html'">Geräte</div>
+        </header>
 
-            <a class="btn" onclick="zeigePC1()">PC-01</a>
-            <a class="btn" onclick="zeigePC2()">PC-02</a>
-            <a class="btn" onclick="zeigeLaptop()">Laptop-01</a>
-            <a class="btn" onclick="zeigeServer()">Server-01</a>
-            <a class="btn" onclick="zeige111()">Computer VLAN 111</a>
-            <a class="btn" onclick="zeige112()">Computer VLAN 112</a>
-            <a class="btn" onclick="zeige121()">Computer VLAN 121</a>
-            <a class="btn" onclick="zeige122()">Computer VLAN 122</a>
+        <div class="network-box">
+            <div class="box-content-wrapper">
+                <div class="content-panel active">
 
+                    <div class="welcome-banner blue-gradient">
+                        <h2>Endgeraete-Verwaltung</h2>
+                        <p>Gesamtübersicht aller aktiven Einzelgeräte im Netzwerk</p>
+                    </div>
+
+                    <div class="campus-inner-box">
+                        <div class="info-group">
+                            <h4>Logische Netze und Einzelgeräte</h4>
+
+                            <div class="vlan-block b-blue">
+                                <h5>VLAN 111 <span class="tag">Gebäude A Clients</span></h5>
+                                <div class="dev"><span>PC-01</span><span class="ip">192.168.111.10</span><span class="status online">Aktiv</span></div>
+                                <div class="dev"><span>PC-02</span><span class="ip">192.168.111.11</span><span class="status online">Aktiv</span></div>
+                                <div class="dev"><span>Drucker-01</span><span class="ip">192.168.111.50</span><span class="status online">Aktiv</span></div>
+                            </div>
+
+                            <div class="vlan-block b-purple">
+                                <h5>VLAN 112 <span class="tag">Gebäude B Clients</span></h5>
+                                <div class="dev"><span>Laptop-01</span><span class="ip">192.168.112.10</span><span class="status online">Aktiv</span></div>
+                                <div class="dev"><span>PC-03</span><span class="ip">192.168.112.11</span><span class="status offline">Inaktiv</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
-
-        <div class="content">
-
-            <h2 id="geraetename">PC-01</h2>
-
-            <p id="hostname">Hostname: PC-01</p>
-            <p id="ip">IP-Adresse: 192.168.1.10</p>
-            <p id="os">Betriebssystem: Windows 11 Pro</p>
-            <p id="cpu">CPU: Intel Core i5-12400</p>
-            <p id="ram">RAM: 16 GB</p>
-
-        </div>
-
     </div>
-
-    <script>
-
-        function zeigePC1() {
-            document.getElementById("geraetename").innerHTML = "PC-01";
-            document.getElementById("hostname").innerHTML = "Hostname: PC-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.10";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Pro";
-            document.getElementById("cpu").innerHTML = "CPU: Intel Core i5-12400";
-            document.getElementById("ram").innerHTML = "RAM: 16 GB";
-        }
-
-        function zeigePC2() {
-            document.getElementById("geraetename").innerHTML = "PC-02";
-            document.getElementById("hostname").innerHTML = "Hostname: PC-02";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.11";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 10 Pro";
-            document.getElementById("cpu").innerHTML = "CPU: AMD Ryzen 5 5600";
-            document.getElementById("ram").innerHTML = "RAM: 32 GB";
-        }
-
-        function zeigeLaptop() {
-            document.getElementById("geraetename").innerHTML = "Laptop-01";
-            document.getElementById("hostname").innerHTML = "Hostname: Laptop-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.20";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11";
-            document.getElementById("cpu").innerHTML = "CPU: Intel Core i7-1360P";
-            document.getElementById("ram").innerHTML = "RAM: 16 GB";
-        }
-
-        function zeigeServer() {
-            document.getElementById("geraetename").innerHTML = "Server-01";
-            document.getElementById("hostname").innerHTML = "Hostname: Server-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.1.100";
-            document.getElementById("os").innerHTML = "Windows Server 2022";
-            document.getElementById("cpu").innerHTML = "CPU: Xeon E-2388G";
-            document.getElementById("ram").innerHTML = "RAM: 64 GB";
-        }
-        function zeige111() {
-            document.getElementById("geraetename").innerHTML = "Computer VLAN 112";
-            document.getElementById("hostname").innerHTML = "Hostname: PC-111-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.112.10";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 10 Pro";
-            document.getElementById("cpu").innerHTML = "CPU: AMD Ryzen 5 5600";
-            document.getElementById("ram").innerHTML = "RAM: 32 GB";
-        }
-        function zeige112() {
-            document.getElementById("geraetename").innerHTML = "Computer VLAN 112";
-            document.getElementById("hostname").innerHTML = "Hostname: PC-112-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.112.10";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Pro";
-            document.getElementById("cpu").innerHTML = "CPU: AMD Ryzen 7 5800X";
-            document.getElementById("ram").innerHTML = "RAM: 32 GB";
-
-            document.getElementById("mac").innerHTML = "MAC-Adresse: 00:1B:44:11:3A:B7";
-            document.getElementById("user").innerHTML = "Angemeldeter Benutzer: Max Mustermann";
-            document.getElementById("storage").innerHTML = "Freier Speicher: 412 GB / 1 TB";
-            document.getElementById("switch").innerHTML = "Switch Status: Online";
-            document.getElementById("server").innerHTML = "Zugeordneter Server: SRV-APP-01";
-            document.getElementById("serverload").innerHTML = "Serverauslastung: 37 %";
-            document.getElementById("services").innerHTML = "Dienste: DNS, DHCP, Fileservice";
-            document.getElementById("uptime").innerHTML = "Uptime: 12 Tage 4 Stunden";
-            document.getElementById("ping").innerHTML = "Ping: 2 ms";
-            document.getElementById("vlan").innerHTML = "VLAN: 112";
-        }
-        function zeige121() {
-            document.getElementById("geraetename").innerHTML = "Computer VLAN 121";
-            document.getElementById("hostname").innerHTML = "Hostname: PC-121-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.121.10";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Enterprise";
-            document.getElementById("cpu").innerHTML = "CPU: Intel Core i7-13700";
-            document.getElementById("ram").innerHTML = "RAM: 32 GB";
-        }
-        function zeige122() {
-            document.getElementById("geraetename").innerHTML = "Computer VLAN 122";
-            document.getElementById("hostname").innerHTML = "Hostname: PC-122-01";
-            document.getElementById("ip").innerHTML = "IP-Adresse: 192.168.122.10";
-            document.getElementById("os").innerHTML = "Betriebssystem: Windows 11 Pro";
-            document.getElementById("cpu").innerHTML = "CPU: Intel Core i9-14900K";
-            document.getElementById("ram").innerHTML = "RAM: 64 GB";
-        }
-
-
-    </script>
-    <button onclick="history.back()" class="back-btn">Zurück</button>
-
-    <style>
-        .back-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            z-index: 9999;
-        }
-
-            .back-btn:hover {
-                background-color: #218838;
-            }
-    </style>
-
 
 </body>
 </html>
