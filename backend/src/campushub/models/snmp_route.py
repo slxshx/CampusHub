@@ -2,7 +2,7 @@ from pydantic import BaseModel, IPvAnyAddress
 from typing import ClassVar
 
 class SnmpRoute(BaseModel):
-    TABLE_NAME: ClassVar[str] = "snmp_route"
+    TABLE_NAME: ClassVar[str] = "snmp_routes"
 
     device_id: int
     interface_index: int

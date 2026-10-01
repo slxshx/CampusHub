@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import ClassVar
 
 class SnmpInterface(BaseModel):
-    TABLE_NAME: ClassVar[str] = "snmp_interface"
+    TABLE_NAME: ClassVar[str] = "snmp_interfaces"
 
     device_id: int
     if_index: int
