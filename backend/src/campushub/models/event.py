@@ -2,26 +2,28 @@ from datetime import datetime
 from typing import ClassVar
 from pydantic import BaseModel
 
+from .enums import EventSeverity, EventSource
+
 class Event(BaseModel):
     TABLE_NAME: ClassVar[str] = "events"
 
     id: int
     device_id: int
+    interface_index: int | None = None
     timestamp: datetime
-    type: str
-    description: str | None = None
+    severity: EventSeverity
+    event_type: str
+    source: EventSource
+    message: str
 
-class CreateEvent(BaseModel):
+class EventCreate(BaseModel):
     TABLE_NAME: ClassVar[str] = "events"
 
     device_id: int
-    timestamp: datetime
-    type: str
-    description: str | None = None
+    interface_index: int | None = None
+    severity: EventSeverity
+    event_type: str
+    source: EventSource
+    message: str
 
-class UpdateEvent(BaseModel):
-    TABLE_NAME: ClassVar[str] = "events"
-
-    type: str | None = None
-    description: str | None = None
-
+    

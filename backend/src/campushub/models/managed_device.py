@@ -3,7 +3,7 @@ from pydantic import BaseModel, IPvAnyAddress
 from .enums import DeviceType, SnmpVersion
 
 class ManagedDevice(BaseModel):
-    TABLE_NAME: ClassVar[str] = "managed_device"
+    TABLE_NAME: ClassVar[str] = "managed_devices"
 
     id: int
     management_ip: IPvAnyAddress
@@ -13,7 +13,7 @@ class ManagedDevice(BaseModel):
     snmp_version: SnmpVersion
 
 class CreateManagedDevice(BaseModel):
-    TABLE_NAME: ClassVar[str] = "managed_device"
+    TABLE_NAME: ClassVar[str] = "managed_devices"
 
     management_ip: IPvAnyAddress
     device_type: DeviceType
@@ -22,7 +22,7 @@ class CreateManagedDevice(BaseModel):
     snmp_version: SnmpVersion
 
 class UpdateManagedDevice(BaseModel):
-    TABLE_NAME: ClassVar[str] = "managed_device"
+    TABLE_NAME: ClassVar[str] = "managed_devices"
 
     management_ip: IPvAnyAddress | None = None
     device_type: DeviceType | None = None
