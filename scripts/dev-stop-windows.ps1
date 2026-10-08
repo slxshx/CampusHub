@@ -20,7 +20,7 @@ if ($NginxRunning) {
         & $NginxExe -s quit
         Pop-Location
 
-        Write-Host "✓ Nginx gestoppt"
+        Write-Host "Nginx gestoppt"
     }
     else {
         Write-Host "FEHLER: nginx.exe wurde nicht gefunden."
@@ -28,7 +28,7 @@ if ($NginxRunning) {
     }
 }
 else {
-    Write-Host "✓ Nginx läuft bereits nicht"
+    Write-Host "Nginx laeuft bereits nicht"
 }
 
 Write-Host ""
@@ -45,10 +45,10 @@ $PostgresService = Get-Service |
 if ($PostgresService) {
     if ($PostgresService.Status -eq "Running") {
         Stop-Service $PostgresService.Name
-        Write-Host "✓ PostgreSQL gestoppt"
+        Write-Host "PostgreSQL gestoppt"
     }
     else {
-        Write-Host "✓ PostgreSQL läuft bereits nicht"
+        Write-Host "PostgreSQL laeuft bereits nicht"
     }
 }
 else {
