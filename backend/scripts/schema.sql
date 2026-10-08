@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 2HC0N8rwX2plChPv03OQfIi4gklA5tvTAS4DWvTc1xCXBwjV04CsHuAXfGAMj2m
+\restrict zHXnsAHLHpcmJoQmFf5oJufhjdkCHh3vPk8Ca5kIWbW862fDQOmnpyqBErtRJR0
 
 -- Dumped from database version 17.11 (Homebrew)
 -- Dumped by pg_dump version 17.11 (Homebrew)
@@ -252,14 +252,6 @@ ALTER TABLE ONLY public.events
 
 
 --
--- Name: events events_interface_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.events
-    ADD CONSTRAINT events_interface_fkey FOREIGN KEY (device_id, interface_index) REFERENCES public.snmp_interfaces(device_id, if_index) ON DELETE CASCADE;
-
-
---
 -- Name: snmp_interfaces snmp_interfaces_device_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -311,5 +303,5 @@ ALTER TABLE ONLY public.snmp_system
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 2HC0N8rwX2plChPv03OQfIi4gklA5tvTAS4DWvTc1xCXBwjV04CsHuAXfGAMj2m
+\unrestrict zHXnsAHLHpcmJoQmFf5oJufhjdkCHh3vPk8Ca5kIWbW862fDQOmnpyqBErtRJR0
 
