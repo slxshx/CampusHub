@@ -1,4 +1,4 @@
-from campushub.models.event import EventCreate
+from campushub.models.event import EventCandidate, EventCreate
 from ..repositories.snmp_interface_repository import SnmpInterfaceRepository
 from ..repositories.event_repository import EventRepository
 from ..models.snmp_device_snapshot import SnmpDeviceSnapshot
@@ -15,37 +15,107 @@ class EventService():
 
         detected_events = self.detect_interfaces_changes(old_interfaces, snapshot_interfaces, device_id)
 
-        for detected_event in detected_events:
-            event_repository.create_event(detected_event)
 
 
-    def detect_interfaces_changes(self, old_interfaces, new_interfaces, device_id) -> list[EventCreate]:
-        detected_events: list[EventCreate] = []
+    def detect_interfaces_changes(self, old_interfaces, new_interfaces, device_id) -> list[EventCandidate]:
+        detected_events: list[EventCandidate] = []
         interfaces = {old_interface.if_index: old_interface for old_interface in old_interfaces}
         for snapshot_interface in new_interfaces:
             new_if_index = snapshot_interface.if_index
             old_interface = interfaces.get(new_if_index)
             if old_interface is not None:
                 if snapshot_interface.oper_status == 2 and old_interface.oper_status == 1:
-                    event = EventCreate(
+                    event = EventCandidate(
                             device_id=device_id,
                             interface_index=new_if_index,
-                            severity=EventSeverity.WARNING,
                             event_type="interface_down",
                             source=EventSource.SNMP_POLL,
                             message=f"{snapshot_interface.description} down"
                             )
                     detected_events.append(event)
                 elif snapshot_interface.oper_status == 1 and old_interface.oper_status == 2:
-                     event = EventCreate(
+                     event = EventCandidate(
                             device_id=device_id,
                             interface_index=new_if_index,
-                            severity=EventSeverity.INFO,
                             event_type="interface_up",
                             source=EventSource.SNMP_POLL,
                             message=f"{snapshot_interface.description} up"
                             )
                      detected_events.append(event)
 
+                if snapshot_interface.admin_status == 2 and old_interface.admin_status == 1:
+                    event = EventCandidate(
+                            device_id=device_id,
+                            interface_index=new_if_index,
+                            event_type="interface_admin_down",
+                            source=EventSource.SNMP_POLL,
+                            message=f"{snapshot_interface.description} administratively down"
+                            )
+                    detected_events.append(event)
+                elif snapshot_interface.admin_status == 1 and old_interface.admin_status == 2:
+                    event = EventCandidate(
+                            device_id=device_id,
+                            interface_index=new_if_index,
+                            event_type="interface_admin_up",
+                            source=EventSource.SNMP_POLL,
+                            message=f"{snapshot_interface.description} administratively up"
+                            )
+                    detected_events.append(event)
+
+
+
         return detected_events
+
+    def detect_ip_changes(self, old_ip_addresses, new_ip_addresses, device_id) -> list[EventCandidate]:
+        detected_events: list[EventCandidate] = []
+        old_ips = {
+                (old_ip_address.interface_index, old_ip_address.address)
+                for old_ip_address in old_ip_addresses
+                }
+
+        new_ips = {
+                (new_ip_address.interface_index, new_ip_address.address)
+                for new_ip_address in new_ip_addresses
+                }
+
+        removed_ips = old_ips - new_ips
+        added_ips = new_ips - old_ips
+
+        for interface_index, address in removed_ips:
+            event = EventCandidate(
+                    device_id=device_id,
+                    interface_index=interface_index,
+                    ip_address=address,
+                    event_type="ip_address_removed",
+                    source=EventSource.SNMP_POLL,
+                    message=f"{address} removed from Interface {interface_index}"
+                    )
+
+            detected_events.append(event)
+
+        for interface_index, address in added_ips:
+            event = EventCandidate(
+                    device_id=device_id,
+                    interface_index=interface_index,
+                    ip_address=address,
+                    event_type="ip_address_added",
+                    source=EventSource.SNMP_POLL,
+                    message=f"{address} added to Interface {interface_index}"
+                    )
+
+            detected_events.append(event)
+
+        return detected_events
+
+    def detect_route_changes(self, old_routes, new_routes, device_id) -> list[EventCandidate]:
+        detected_events: list[EventCandidate] = []
+        # 2 More events:
+        # route_added
+        # route_removed
+
+        return detected_events
+
+        
+
+
 
