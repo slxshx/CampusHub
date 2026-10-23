@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import ClassVar
 from pydantic import BaseModel, IPvAnyAddress
 
+from campushub.models import snmp_route
+
 from .enums import EventSeverity, EventSource
 
 class Event(BaseModel):
@@ -20,7 +22,8 @@ class EventCandidate(BaseModel):
     device_id: int
     interface_index: int | None = None
     ip_address: IPvAnyAddress | None = None
-    event_type: str
+    route: snmp_route.SnmpRoute | None = None
+    event_type: str 
     source: EventSource
     message: str
 

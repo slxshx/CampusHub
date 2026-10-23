@@ -109,9 +109,30 @@ class EventService():
 
     def detect_route_changes(self, old_routes, new_routes, device_id) -> list[EventCandidate]:
         detected_events: list[EventCandidate] = []
-        # 2 More events:
-        # route_added
-        # route_removed
+        old_route_keys = {
+                (old_route.interface_index, old_route.destination, old_route.subnet_mask, old_route.next_hop)
+                for old_route in old_routes
+                }
+
+        new_route_keys = {
+                (new_route.interface_index, new_route.destination, new_route.subnet_mask, new_route.next_hop)
+                for new_route in new_routes
+                }
+
+        removed = old_route_keys - new_route_keys
+        added = new_route_keys - old_route_keys
+
+        for if_index, dest, subnet, hop in removed:
+            event = EventCandidate(
+                    device_id=device_id,
+                    interface_index=if_index,
+
+                    )
+
+
+
+
+
 
         return detected_events
 
