@@ -13,6 +13,7 @@ class SnmpVersion(str, Enum):
 
 class EventSeverity(str, Enum):
     INFO = "info"
+    LOW = "low"
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"

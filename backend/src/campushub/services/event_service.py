@@ -1,4 +1,6 @@
 from campushub.models.event import EventCandidate, EventCreate
+from campushub.repositories.snmp_ip_address_repository import SnmpIpAddressRepository
+from campushub.repositories.snmp_route_repository import SnmpRouteRepository
 from ..repositories.snmp_interface_repository import SnmpInterfaceRepository
 from ..repositories.event_repository import EventRepository
 from ..models.snmp_device_snapshot import SnmpDeviceSnapshot
@@ -8,12 +10,29 @@ class EventService():
     def detect_events(self, device_snapshot: SnmpDeviceSnapshot) -> None:
         device_id = device_snapshot.system.device_id
         interface_repository = SnmpInterfaceRepository()
+        ip_address_repository = SnmpIpAddressRepository()
+        route_repository = SnmpRouteRepository()
         event_repository = EventRepository()
+
 
         snapshot_interfaces = device_snapshot.interfaces
         old_interfaces = interface_repository.get_by_device(device_id)
 
         detected_events = self.detect_interfaces_changes(old_interfaces, snapshot_interfaces, device_id)
+
+        snapshot_ip_addresses = device_snapshot.ip_addresses
+        old_ip_addresses = ip_address_repository.get_by_device(device_id)
+
+        ip_address_events = self.detect_ip_changes(old_ip_addresses, snapshot_ip_addresses, device_id)
+
+        detected_events.extend(ip_address_events)
+
+        snapshot_routes = device_snapshot.routes
+        old_routes = route_repository.get_by_device(device_id)
+
+        route_events = self.detect_route_changes(old_routes, snapshot_routes, device_id)
+
+        detected_events.extend(route_events)
 
 
 
@@ -110,33 +129,65 @@ class EventService():
     def detect_route_changes(self, old_routes, new_routes, device_id) -> list[EventCandidate]:
         detected_events: list[EventCandidate] = []
         old_route_keys = {
-                (old_route.interface_index, old_route.destination, old_route.subnet_mask, old_route.next_hop)
-                for old_route in old_routes
-                }
+            (
+                old_route.interface_index,
+                old_route.destination,
+                old_route.subnet_mask,
+                old_route.next_hop
+            ): old_route
+            for old_route in old_routes
+        }
 
         new_route_keys = {
-                (new_route.interface_index, new_route.destination, new_route.subnet_mask, new_route.next_hop)
-                for new_route in new_routes
-                }
+            (
+                new_route.interface_index,
+                new_route.destination,
+                new_route.subnet_mask,
+                new_route.next_hop
+            ): new_route
+            for new_route in new_routes
+        }
 
-        removed = old_route_keys - new_route_keys
-        added = new_route_keys - old_route_keys
+        removed_routes = old_route_keys.keys() - new_route_keys.keys()
+        added_routes = new_route_keys.keys() - old_route_keys.keys()
 
-        for if_index, dest, subnet, hop in removed:
+
+        for removed_route in removed_routes:
+            route_obj = old_route_keys[removed_route]
+
             event = EventCandidate(
                     device_id=device_id,
-                    interface_index=if_index,
-
+                    interface_index=route_obj.interface_index,
+                    route=route_obj,
+                    event_type="route_removed",
+                    source=EventSource.SNMP_POLL,
+                    message=(
+                        f"Route removed: {route_obj.destination} "
+                        f"(mask: {route_obj.subnet_mask}) "
+                        f"via {route_obj.next_hop}, "
+                        f"interface {route_obj.interface_index}"
+                        )
                     )
 
+            detected_events.append(event)
 
+        for added_route in added_routes:
+            route_obj = new_route_keys[added_route]
 
+            event = EventCandidate(
+                    device_id=device_id,
+                    interface_index=route_obj.interface_index,
+                    route=route_obj,
+                    event_type="route_added",
+                    source=EventSource.SNMP_POLL,
+                    message=(
+                        f"Route added: {route_obj.destination} "
+                        f"(mask: {route_obj.subnet_mask}) "
+                        f"via {route_obj.next_hop}, "
+                        f"interface {route_obj.interface_index}"
+                        )
+                    )
 
-
+            detected_events.append(event)
 
         return detected_events
-
-        
-
-
-
