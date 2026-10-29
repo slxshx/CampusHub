@@ -9,11 +9,23 @@ from ..models.event import Event, EventCreate
 class EventRepository(BaseRepository):
 
     def get_events(self) -> list[Event]:
-        return BaseRepository.get_all(
-            self,
-            Event,
-            Event.TABLE_NAME,
-        )
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                query = SQL("""
+                            SELECT *
+                            FROM {}
+                            ORDER BY timestamp DESC, id DESC
+                            LIMIT 50;
+                        """).format(
+                                Identifier(Event.TABLE_NAME)
+                                )
+                cursor.execute(query)
+                results = cursor.fetchall()
+
+                return [
+                        Event(**result)
+                        for result in results
+                        ]
 
     def create_event(self, event: EventCreate) -> Event | None:
         return BaseRepository.create(
@@ -30,7 +42,8 @@ class EventRepository(BaseRepository):
                     SELECT *
                     FROM {}
                     WHERE device_id = %s
-                    ORDER BY timestamp DESC
+                    ORDER BY timestamp DESC, id DESC
+                    LIMIT 50
                 """).format(
                     Identifier(Event.TABLE_NAME)
                 )

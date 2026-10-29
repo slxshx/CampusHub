@@ -4,7 +4,7 @@ from pydantic import BaseModel, IPvAnyAddress
 
 from campushub.models import snmp_route
 
-from .enums import EventSeverity, EventSource
+from .enums import EventSeverity, EventSource, EventType
 
 class Event(BaseModel):
     TABLE_NAME: ClassVar[str] = "events"
@@ -14,7 +14,7 @@ class Event(BaseModel):
     interface_index: int | None = None
     timestamp: datetime
     severity: EventSeverity
-    event_type: str
+    event_type: EventType
     source: EventSource
     message: str
 
@@ -23,7 +23,7 @@ class EventCandidate(BaseModel):
     interface_index: int | None = None
     ip_address: IPvAnyAddress | None = None
     route: snmp_route.SnmpRoute | None = None
-    event_type: str 
+    event_type: EventType 
     source: EventSource
     message: str
 
@@ -34,7 +34,7 @@ class EventCreate(BaseModel):
     device_id: int
     interface_index: int | None = None
     severity: EventSeverity
-    event_type: str
+    event_type: EventType
     source: EventSource
     message: str
 

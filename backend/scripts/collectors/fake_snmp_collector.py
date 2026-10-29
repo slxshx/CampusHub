@@ -1,3 +1,4 @@
+import argparse
 import random
 import time
 from ipaddress import ip_address
@@ -15,11 +16,13 @@ from campushub.services.snmp_ingest_service import SnmpIngestService
 
 
 class FakeSnmpCollector:
-    def __init__(self, interval: int = 15) -> None:
+    def __init__(self, interval: int = 15, cycles: int | None = None) -> None:
         self.ingest: SnmpIngestService = SnmpIngestService()
         self.device_repository: ManagedDeviceRepository = ManagedDeviceRepository()
 
         self.interval: int = interval
+        self.cycles: int | None = cycles
+        self.cycle: int = 0
         self.running: bool = False
 
         self.device_ids: dict[str, int] = {}
@@ -117,7 +120,7 @@ class FakeSnmpCollector:
                 speed=100_000_000,
                 mac_address="00:11:22:33:44:02",
                 admin_status=1,
-                oper_status=random.choice([1, 1, 1, 1, 2]),
+                oper_status=1,
             ),
         ]
 
@@ -194,14 +197,7 @@ class FakeSnmpCollector:
                     speed=1_000_000_000,
                     mac_address=f"00:22:33:44:55:{port + 1:02X}",
                     admin_status=1,
-                    oper_status=random.choice([
-                        1,
-                        1,
-                        1,
-                        1,
-                        1,
-                        2,
-                    ]),
+                    oper_status=1,
                 )
             )
 
@@ -245,7 +241,7 @@ class FakeSnmpCollector:
                 speed=1_000_000_000,
                 mac_address="00:33:44:55:66:01",
                 admin_status=1,
-                oper_status=random.choice([1, 1, 1, 1, 1, 2]),
+                oper_status=1,
             ),
             SnmpInterface(
                 device_id=device_id,
@@ -316,7 +312,7 @@ class FakeSnmpCollector:
                 speed=1_000_000_000,
                 mac_address="00:44:55:66:77:01",
                 admin_status=1,
-                oper_status=random.choice([1, 1, 1, 1, 2]),
+                oper_status=1,
             )
         ]
 
@@ -359,6 +355,73 @@ class FakeSnmpCollector:
             routes=routes,
         )
 
+    def apply_scenario(self, snapshot: SnmpDeviceSnapshot, phase: int) -> None:
+        """Apply a deterministic disturbance to an otherwise healthy snapshot.
+
+        The states deliberately last at least two polls. Therefore the event
+        detector can demonstrate that it emits changes, not repeated alarms.
+        """
+        device_type = self.get_config(snapshot.system.device_id)["device_type"]
+
+        # Router: operational link loss causes the associated route to vanish.
+        # This tests interface_down + route_removed correlation (score 45).
+        if device_type == DeviceType.ROUTER and phase in (2, 3):
+            for interface in snapshot.interfaces:
+                if interface.if_index == 2:
+                    interface.oper_status = 2
+            snapshot.routes = [
+                route for route in snapshot.routes if route.interface_index != 2
+            ]
+
+        # Switch: deliberate administrative shutdown; both status events fire.
+        if device_type == DeviceType.SWITCH and phase in (6, 7):
+            for interface in snapshot.interfaces:
+                if interface.if_index == 2:
+                    interface.admin_status = 2
+                    interface.oper_status = 2
+
+        # Server: a vanished IPv4 default route is CRITICAL (score 85).
+        if device_type == DeviceType.SERVER and phase in (10, 11):
+            snapshot.routes = [
+                route for route in snapshot.routes
+                if not (
+                    route.destination == ip_address("0.0.0.0")
+                    and route.subnet_mask == ip_address("0.0.0.0")
+                )
+            ]
+
+        # Client: remove and later restore an assigned IP address.
+        if device_type == DeviceType.CLIENT and phase in (13,):
+            snapshot.ip_addresses = []
+
+        # Server: default-route loss AND the corresponding interface fails.
+        # Correlation + default-route modifier produces HIGH (score 70).
+        if device_type == DeviceType.SERVER and phase in (16, 17):
+            for interface in snapshot.interfaces:
+                if interface.if_index == 1:
+                    interface.oper_status = 2
+            snapshot.routes = [
+                route for route in snapshot.routes
+                if not (
+                    route.destination == ip_address("0.0.0.0")
+                    and route.subnet_mask == ip_address("0.0.0.0")
+                )
+            ]
+
+    def seed_baseline(self) -> None:
+        """Initialize only the four fake devices, without generating events.
+
+        This intentionally resets their current SNMP snapshots for a
+        reproducible demonstration. It does not clear existing event history.
+        """
+        self.ensure_devices()
+        print("Seeding healthy fake-device baseline (without event detection)...")
+        for management_ip, device_id in self.device_ids.items():
+            snapshot = self.simulate_device(device_id, phase=0)
+            self.ingest.process_snapshot(snapshot, detect_events=False)
+            print(f"  Baseline: {snapshot.system.name} ({management_ip})")
+        print("Baseline complete.")
+
     def build_snapshot(
         self,
         device_id: int,
@@ -397,54 +460,67 @@ class FakeSnmpCollector:
             f"No fake configuration found for device {device_id}"
         )
 
-    def simulate_device(self, device_id: int) -> SnmpDeviceSnapshot:
+    def simulate_device(self, device_id: int, phase: int | None = None) -> SnmpDeviceSnapshot:
         config = self.get_config(device_id)
+        if phase is None:
+            phase = self.cycle % 20
 
         match config["device_type"]:
             case DeviceType.ROUTER:
-                return self.simulate_router(device_id)
-
+                snapshot = self.simulate_router(device_id)
             case DeviceType.SWITCH:
-                return self.simulate_switch(device_id)
-
+                snapshot = self.simulate_switch(device_id)
             case DeviceType.SERVER:
-                return self.simulate_server(device_id)
-
+                snapshot = self.simulate_server(device_id)
             case DeviceType.CLIENT:
-                return self.simulate_client(device_id)
-
+                snapshot = self.simulate_client(device_id)
             case _:
                 raise RuntimeError("Unsupported fake device type")
 
-    def run(self) -> None:
-        self.ensure_devices()
-        self.running = True
+        self.apply_scenario(snapshot, phase)
+        return snapshot
 
-        print(
-            f"Fake SNMP collector started "
-            f"(interval: {self.interval}s)"
-        )
+    def run(self) -> None:
+        # Always reset fake-device snapshot state for a reproducible demo.
+        # Requires detect_events=False support in SnmpIngestService.
+        self.seed_baseline()
+        self.running = True
+        print(f"Fake SNMP collector started (interval: {self.interval}s)")
+        print("Demo repeats every 20 cycles; Ctrl+C stops it.")
 
         try:
-            while self.running:
+            while self.running and (self.cycles is None or self.cycle < self.cycles):
+                phase = self.cycle % 20
+                print(f"\n[cycle {self.cycle + 1}, scenario phase {phase}/19]")
                 for management_ip, device_id in self.device_ids.items():
-                    snapshot = self.simulate_device(device_id)
-
-                    self.ingest.process_snapshot(snapshot)
-
+                    snapshot = self.simulate_device(device_id, phase=phase)
+                    result = self.ingest.process_snapshot(snapshot)
+                    event_count = len(result.events) if result is not None else 0
                     print(
-                        f"{snapshot.system.name} "
-                        f"({management_ip}) | "
-                        f"uptime={snapshot.system.uptime} | "
-                        f"interfaces="
-                        f"{[interface.oper_status for interface in snapshot.interfaces]}"
+                        f"  {snapshot.system.name} ({management_ip}) | "
+                        f"interfaces={[i.oper_status for i in snapshot.interfaces]} | "
+                        f"ips={len(snapshot.ip_addresses)} | "
+                        f"routes={len(snapshot.routes)} | "
+                        f"classified_events={event_count}"
                     )
+                    if result is not None and result.events:
+                        print(
+                            f"    Candidates: {result.candidate_count} | "
+                            f"correlated: {result.correlated_count} | "
+                            f"classifier: {result.processing_time_ms:.3f} ms"
+                        )
+                        for event in result.events:
+                            print(
+                                f"    [{event.severity.value.upper()}] "
+                                f"{event.event_type.value}: {event.message}"
+                            )
 
-                print("-" * 70)
-                time.sleep(self.interval)
-
+                self.cycle += 1
+                if self.running and (self.cycles is None or self.cycle < self.cycles):
+                    time.sleep(self.interval)
         except KeyboardInterrupt:
             print("\nStopping fake SNMP collector...")
+        finally:
             self.stop()
 
     def stop(self) -> None:
@@ -453,5 +529,17 @@ class FakeSnmpCollector:
 
 
 if __name__ == "__main__":
-    collector = FakeSnmpCollector(interval=15)
-    collector.run()
+    parser = argparse.ArgumentParser(description="CampusHub deterministic SNMP demo")
+    parser.add_argument("--interval", type=int, default=15, help="Seconds per poll")
+    parser.add_argument("--cycles", type=int, default=None, help="Stop after N polls")
+    parser.add_argument("--seed-only", action="store_true", help="Only seed baseline")
+    args = parser.parse_args()
+    if args.interval < 0 or (args.cycles is not None and args.cycles < 1):
+        parser.error("--interval must be >= 0 and --cycles must be >= 1")
+
+    collector = FakeSnmpCollector(interval=args.interval, cycles=args.cycles)
+    if args.seed_only:
+        collector.seed_baseline()
+    else:
+        collector.run()
+

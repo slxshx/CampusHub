@@ -1,19 +1,22 @@
-from campushub.models.event import EventCandidate, EventCreate
+from campushub.models.classification_result import ClassificationResult
+from campushub.models.event import EventCandidate
 from campushub.repositories.snmp_ip_address_repository import SnmpIpAddressRepository
 from campushub.repositories.snmp_route_repository import SnmpRouteRepository
-from ..repositories.snmp_interface_repository import SnmpInterfaceRepository
-from ..repositories.event_repository import EventRepository
-from ..models.snmp_device_snapshot import SnmpDeviceSnapshot
-from ..models.enums import EventSeverity, EventSource
+from campushub.services.severity_classifier import SeverityClassifier
+from campushub.repositories.snmp_interface_repository import SnmpInterfaceRepository
+from campushub.repositories.event_repository import EventRepository
+from campushub.models.snmp_device_snapshot import SnmpDeviceSnapshot
+from campushub.models.enums import EventSource, EventType
 
 class EventService():
-    def detect_events(self, device_snapshot: SnmpDeviceSnapshot) -> None:
+    def detect_events(self, device_snapshot: SnmpDeviceSnapshot) -> ClassificationResult:
         device_id = device_snapshot.system.device_id
         interface_repository = SnmpInterfaceRepository()
         ip_address_repository = SnmpIpAddressRepository()
         route_repository = SnmpRouteRepository()
         event_repository = EventRepository()
 
+        classifier = SeverityClassifier()
 
         snapshot_interfaces = device_snapshot.interfaces
         old_interfaces = interface_repository.get_by_device(device_id)
@@ -34,7 +37,12 @@ class EventService():
 
         detected_events.extend(route_events)
 
+        classified_events = classifier.analyze_candidates(detected_events, snapshot_interfaces)
 
+        for classified_event in classified_events.events:
+            event_repository.create_event(classified_event)
+
+        return classified_events
 
     def detect_interfaces_changes(self, old_interfaces, new_interfaces, device_id) -> list[EventCandidate]:
         detected_events: list[EventCandidate] = []
@@ -47,7 +55,7 @@ class EventService():
                     event = EventCandidate(
                             device_id=device_id,
                             interface_index=new_if_index,
-                            event_type="interface_down",
+                            event_type=EventType.INTERFACE_DOWN,
                             source=EventSource.SNMP_POLL,
                             message=f"{snapshot_interface.description} down"
                             )
@@ -56,7 +64,7 @@ class EventService():
                      event = EventCandidate(
                             device_id=device_id,
                             interface_index=new_if_index,
-                            event_type="interface_up",
+                            event_type=EventType.INTERFACE_UP,
                             source=EventSource.SNMP_POLL,
                             message=f"{snapshot_interface.description} up"
                             )
@@ -66,7 +74,7 @@ class EventService():
                     event = EventCandidate(
                             device_id=device_id,
                             interface_index=new_if_index,
-                            event_type="interface_admin_down",
+                            event_type=EventType.INTERFACE_ADMIN_DOWN,
                             source=EventSource.SNMP_POLL,
                             message=f"{snapshot_interface.description} administratively down"
                             )
@@ -75,7 +83,7 @@ class EventService():
                     event = EventCandidate(
                             device_id=device_id,
                             interface_index=new_if_index,
-                            event_type="interface_admin_up",
+                            event_type=EventType.INTERFACE_ADMIN_UP,
                             source=EventSource.SNMP_POLL,
                             message=f"{snapshot_interface.description} administratively up"
                             )
@@ -105,7 +113,7 @@ class EventService():
                     device_id=device_id,
                     interface_index=interface_index,
                     ip_address=address,
-                    event_type="ip_address_removed",
+                    event_type=EventType.IP_ADDRESS_REMOVED,
                     source=EventSource.SNMP_POLL,
                     message=f"{address} removed from Interface {interface_index}"
                     )
@@ -117,7 +125,7 @@ class EventService():
                     device_id=device_id,
                     interface_index=interface_index,
                     ip_address=address,
-                    event_type="ip_address_added",
+                    event_type=EventType.IP_ADDRESS_ADDED,
                     source=EventSource.SNMP_POLL,
                     message=f"{address} added to Interface {interface_index}"
                     )
@@ -159,7 +167,7 @@ class EventService():
                     device_id=device_id,
                     interface_index=route_obj.interface_index,
                     route=route_obj,
-                    event_type="route_removed",
+                    event_type=EventType.ROUTE_REMOVED,
                     source=EventSource.SNMP_POLL,
                     message=(
                         f"Route removed: {route_obj.destination} "
@@ -178,7 +186,7 @@ class EventService():
                     device_id=device_id,
                     interface_index=route_obj.interface_index,
                     route=route_obj,
-                    event_type="route_added",
+                    event_type=EventType.ROUTE_ADDED,
                     source=EventSource.SNMP_POLL,
                     message=(
                         f"Route added: {route_obj.destination} "
