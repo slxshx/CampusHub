@@ -212,3 +212,37 @@ body {
     .status.offline {
         color: #ef4444;
     }
+.switch-detail {
+    margin-left: 25px;
+    background: #f8fafc;
+    border-left: 3px solid #3b82f6;
+    font-size: 0.8rem;
+}
+
+#geraete-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 15px;
+}
+
+.device-card {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.device-header {
+    background: #1e293b;
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+}
+
+.device-body {
+    padding: 15px;
+}
+
+    .device-body div {
+        margin-bottom: 10px;
+    }

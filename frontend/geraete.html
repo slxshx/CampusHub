@@ -7,48 +7,57 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="campus-inner-box">
+        <div class="info-group">
+            <h4>Logische Netze und Einzelgeräte</h4>
 
-    <div class="dashboard-wrapper">
+            <div class="vlan-block b-blue">
+                <h5>Geräte aus Datenbank</h5>
 
-        <header class="box-menu">
-            <div class="menu-btn" onclick="window.location.href='index.html'">Übersicht</div>
-            <div class="menu-btn" onclick="window.location.href='campus/campus1.html'">Campus 1</div>
-            <div class="menu-btn" onclick="window.location.href='campus/campus2.html'">Campus 2</div>
-            <div class="menu-btn active" onclick="window.location.href='geraete.html'">Geräte</div>
-        </header>
-
-        <div class="network-box">
-            <div class="box-content-wrapper">
-                <div class="content-panel active">
-
-                    <div class="welcome-banner blue-gradient">
-                        <h2>Endgeraete-Verwaltung</h2>
-                        <p>Gesamtübersicht aller aktiven Einzelgeräte im Netzwerk</p>
-                    </div>
-
-                    <div class="campus-inner-box">
-                        <div class="info-group">
-                            <h4>Logische Netze und Einzelgeräte</h4>
-
-                            <div class="vlan-block b-blue">
-                                <h5>VLAN 111 <span class="tag">Gebäude A Clients</span></h5>
-                                <div class="dev"><span>PC-01</span><span class="ip">192.168.111.10</span><span class="status online">Aktiv</span></div>
-                                <div class="dev"><span>PC-02</span><span class="ip">192.168.111.11</span><span class="status online">Aktiv</span></div>
-                                <div class="dev"><span>Drucker-01</span><span class="ip">192.168.111.50</span><span class="status online">Aktiv</span></div>
-                            </div>
-
-                            <div class="vlan-block b-purple">
-                                <h5>VLAN 112 <span class="tag">Gebäude B Clients</span></h5>
-                                <div class="dev"><span>Laptop-01</span><span class="ip">192.168.112.10</span><span class="status online">Aktiv</span></div>
-                                <div class="dev"><span>PC-03</span><span class="ip">192.168.112.11</span><span class="status offline">Inaktiv</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                <div id="geraete-container"></div>
             </div>
         </div>
     </div>
+    <script>
+        async function ladeGeraete() {
+            try {
+                const response = await fetch("http://localhost:8000/api/devices");
+                const daten = await response.json();
 
+                const container =
+                    document.getElementById("geraete-container");
+
+                container.innerHTML = "";
+
+                daten.forEach(geraet => {
+
+                    const statusClass =
+                        geraet.enabled ? "online" : "offline";
+
+                    const statusText =
+                        geraet.enabled ? "Aktiv" : "Inaktiv";
+
+                    const html = `
+                   <div class="row">
+                        <span>${geraet.name}</span>
+                        <span class="ip">
+                            ${geraet.management_ip}
+                        </span>
+                        <span class="status ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </div>
+                `;
+                    container.innerHTML += html;
+                });
+
+            } catch (error) {
+                console.error("Fehler beim Laden:", error);
+            }
+        }
+
+        ladeGeraete();
+        setInterval(ladeGeraete, 15000);
+    </script>
 </body>
 </html>

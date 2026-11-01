@@ -3,47 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Netzwerk-Verwaltung</title>
+    <title>Geraeteliste</title>
     <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
     <div class="dashboard-wrapper">
 
         <header class="box-menu">
-            <div class="menu-btn active" onclick="window.location.href='index.html'">Übersicht</div>
+            <div class="menu-btn" onclick="window.location.href='index.html'">Übersicht</div>
             <div class="menu-btn" onclick="window.location.href='campus/campus1.html'">Campus 1</div>
             <div class="menu-btn" onclick="window.location.href='campus/campus2.html'">Campus 2</div>
-            <div class="menu-btn" onclick="window.location.href='geraete.html'">Geräte</div>
+            <div class="menu-btn active" onclick="window.location.href='geraete.html'">Geräte</div>
         </header>
 
         <div class="network-box">
             <div class="box-content-wrapper">
-                <div class="content-panel active">
+                <div class="content-panel">
+
                     <div class="welcome-banner">
-                        <h2>Zentrales Lab Dashboard</h2>
+                        <h2>Endgeräte-Verwaltung</h2>
+                        <p>Gesamtübersicht aller aktiven Einzelgeräte im Netzwerk</p>
                     </div>
-                    <div class="quick-status-grid">
-                        <div class="status-mini-card">
-                            <span>Campus 1 Status:</span>
-                            <span class="status online">Normalbetrieb</span>
-                        </div>
-                        <div class="status-mini-card">
-                            <span>Campus 2 Status:</span>
-                            <span class="status online">Bereit</span>
-                        </div>
-                        <div class="status-mini-card">
-                            <span>Aktive VLANs im Lab:</span>
-                            <div class="vlan-tags-container">
-                                <span class="vlan-tag">VLAN 111</span>
-                                <span class="vlan-tag">VLAN 112</span>
+
+                    <div class="campus-inner-box">
+                        <div class="info-group">
+                            <h4>Geräte aus Datenbank</h4>
+
+                            <div id="deviceList">
+
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
-
+<script src="script.js"></script>
 </body>
 </html>
