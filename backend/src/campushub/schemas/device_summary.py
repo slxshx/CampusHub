@@ -10,3 +10,6 @@ class DeviceSummary(BaseModel):
     device_type: DeviceType
     location: str | None = None
     enabled: bool
+    cpu: float | None = None
+    gpu: float | None = None
+    ram: float | None = None

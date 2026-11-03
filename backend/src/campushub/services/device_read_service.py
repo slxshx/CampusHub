@@ -1,3 +1,5 @@
+import sys
+
 from ..repositories.snmp_system_repository import SnmpSystemRepository
 from ..repositories.snmp_interface_repository import SnmpInterfaceRepository
 from ..repositories.snmp_ip_address_repository import SnmpIpAddressRepository
@@ -27,10 +29,16 @@ class DeviceReadService():
             system = self.system.get_by_device(device.id)
             device_name = None
             device_location = None
+            device_cpu = None
+            device_gpu = None
+            device_ram = None
 
             if system:
                 device_name = system.name
                 device_location = system.location
+                device_cpu = system.cpu
+                device_gpu = system.gpu
+                device_ram = system.ram
 
             summary = DeviceSummary(
                         id = device.id,
@@ -38,7 +46,10 @@ class DeviceReadService():
                         management_ip = device.management_ip,
                         device_type = device.device_type,
                         location = device_location,
-                        enabled = device.enabled
+                        enabled = device.enabled,
+                        cpu = device_cpu,
+                        gpu = device_gpu,
+                        ram = device_ram
                         )
 
             summaries.append(summary)
@@ -61,7 +72,10 @@ class DeviceReadService():
                     object_id = system.object_id,
                     uptime = system.uptime,
                     name = system.name,
-                    location = system.location
+                    location = system.location,
+                    cpu = system.cpu,
+                    gpu = system.gpu,
+                    ram = system.ram
                     )
 
  

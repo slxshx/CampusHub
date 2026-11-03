@@ -440,6 +440,9 @@ class FakeSnmpCollector:
             uptime=self.uptimes[device_id],
             name=config["name"],
             location=config["location"],
+            cpu=round(random.uniform(5.0, 100.0), 1),
+            gpu=round(random.uniform(0.0, 95.0), 1),
+            ram=round(random.uniform(5.0, 100.0), 1),
         )
 
         return SnmpDeviceSnapshot(

@@ -34,16 +34,22 @@ class SnmpSystemRepository:
                         object_id,
                         uptime,
                         name,
-                        location
+                        location,
+                        cpu,
+                        gpu,
+                        ram
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (device_id)
                     DO UPDATE SET
                         description = EXCLUDED.description,
                         object_id = EXCLUDED.object_id,
                         uptime = EXCLUDED.uptime,
                         name = EXCLUDED.name,
-                        location = EXCLUDED.location
+                        location = EXCLUDED.location,
+                        cpu = EXCLUDED.cpu,
+                        gpu = EXCLUDED.gpu,
+                        ram = EXCLUDED.ram
                     RETURNING *
                 """).format(
                     Identifier(SnmpSystem.TABLE_NAME)
@@ -58,6 +64,9 @@ class SnmpSystemRepository:
                         system.uptime,
                         system.name,
                         system.location,
+                        system.cpu,
+                        system.gpu,
+                        system.ram
                     ),
                 )
 

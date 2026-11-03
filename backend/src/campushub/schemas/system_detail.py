@@ -7,3 +7,6 @@ class SystemDetail(BaseModel):
     uptime: int | None = None
     name: str | None = None
     location: str | None = None
+    cpu: float | None = None
+    gpu: float | None = None
+    ram: float | None = None
