@@ -66,6 +66,75 @@
             </div>
         </div>
     </div>
+    <script>
+        const API_URL = "http://localhost:8000/api/devices";
 
+        async function loadCampusDevices() {
+
+            try {
+
+                const response = await fetch(API_URL);
+                const devices = await response.json();
+
+                const routerContainer =
+                    document.getElementById("router-container");
+
+                const switchContainer =
+                    document.getElementById("switch-container");
+
+                const serverContainer =
+                    document.getElementById("server-container");
+
+                const clientContainer =
+                    document.getElementById("client-container");
+
+                routerContainer.innerHTML = "";
+                switchContainer.innerHTML = "";
+                serverContainer.innerHTML = "";
+                clientContainer.innerHTML = "";
+
+                devices.forEach(device => {
+
+                    const row = `
+                        <div class="row">
+                            <span>
+                                ${device.name}
+                                (CPU: ${device.cpu ?? "--"}%)
+                            </span>
+
+                            <span class="status online">
+                                ${device.enabled ? "Aktiv" : "Offline"}
+                            </span>
+                        </div>
+                    `;
+
+                    switch (device.device_type?.toLowerCase()) {
+
+                        case "router":
+                            routerContainer.innerHTML += row;
+                            break;
+
+                        case "switch":
+                            switchContainer.innerHTML += row;
+                            break;
+
+                        case "server":
+                            serverContainer.innerHTML += row;
+                            break;
+
+                        case "client":
+                            clientContainer.innerHTML += row;
+                            break;
+                    }
+                });
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        loadCampusDevices();
+    </script>
+    <script src="campus1.js"></script>
 </body>
 </html>

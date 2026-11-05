@@ -22,16 +22,13 @@ async function loadDevices() {
         devices.forEach(device => {
 
             const cpu =
-                device.cpu_usage ?? "--";
+                device.cpu ?? "--";
 
             const ram =
-                device.ram_usage ?? "--";
+                device.ram ?? "--";
 
-            const storage =
-                device.storage_usage ?? "--";
-
-            const network =
-                device.network_usage ?? "--";
+            const gpu =
+                device.gpu ?? "--";
 
             deviceList.innerHTML += `
 
@@ -52,7 +49,6 @@ async function loadDevices() {
                             <strong>IP:</strong>
                             ${device.management_ip}
                         </div>
-
                         <div>
                             <strong>CPU:</strong>
                             ${cpu} %
@@ -64,18 +60,15 @@ async function loadDevices() {
                         </div>
 
                         <div>
-                            <strong>Storage:</strong>
-                            ${storage} %
-                        </div>
-
-                        <div>
-                            <strong>Netzwerk:</strong>
-                            ${network} %
+                            <strong>GPU:</strong>
+                            ${gpu} %
                         </div>
 
                         <div>
                             <strong>Status:</strong>
-                            Aktiv
+                            <span class="${device.enabled ? 'status-online' : 'status-offline'}">
+                                ${device.enabled ? 'Aktiv' : 'Offline'}
+                            </span>
                         </div>
 
                     </div>

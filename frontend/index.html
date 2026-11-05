@@ -3,19 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geraeteliste</title>
+    <title>Geräteliste</title>
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 
     <div class="dashboard-wrapper">
 
         <header class="box-menu">
-            <div class="menu-btn" onclick="window.location.href='index.html'">Übersicht</div>
-            <div class="menu-btn" onclick="window.location.href='campus/campus1.html'">Campus 1</div>
-            <div class="menu-btn" onclick="window.location.href='campus/campus2.html'">Campus 2</div>
-            <div class="menu-btn active" onclick="window.location.href='geraete.html'">Geräte</div>
+            <div class="menu-btn active"
+                 onclick="window.location.href='index.html'">
+                Übersicht
+            </div>
+
+            <div class="menu-btn"
+                 onclick="window.location.href='campus/campus1.html'">
+                Campus 1
+            </div>
+
+            <div class="menu-btn"
+                 onclick="window.location.href='campus/campus2.html'">
+                Campus 2
+            </div>
+
+            <div class="menu-btn"
+                 onclick="window.location.href='geraete.html'">
+                Geräte
+            </div>
         </header>
 
         <div class="network-box">
@@ -29,18 +43,21 @@
 
                     <div class="campus-inner-box">
                         <div class="info-group">
+
                             <h4>Geräte aus Datenbank</h4>
 
-                            <div id="deviceList">
+                            <div id="geraete-container"></div>
 
-                            </div>
                         </div>
                     </div>
 
                 </div>
             </div>
         </div>
+
     </div>
-<script src="script.js"></script>
+
+    <script src="script.js"></script>
+
 </body>
 </html>
