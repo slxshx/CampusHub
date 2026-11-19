@@ -2,12 +2,12 @@
 
 ## Ziel
 
-Das Backend von CampusHub wurde so aufgebaut, dass Gerätedaten zentral über SNMP eingesammelt, in PostgreSQL gespeichert und anschließend über eine einfache REST-API für das Frontend bereitgestellt werden.
+CampusHub verarbeitet strukturierte SNMP-Gerätesnapshots, speichert sie in PostgreSQL und stellt die Daten über eine REST-API für das Frontend bereit. Im abgeschlossenen Schulprojekt stammen die Snapshots aus einem SNMP-Simulator; ein Collector, der reale Geräte per SNMP abfragt, ist nicht implementiert.
 
 Die zentrale Idee ist:
 
 ```text
-SNMP Collector / Simulator
+Fake SNMP Collector
         ↓
 SnmpDeviceSnapshot
         ↓
@@ -114,7 +114,7 @@ SnmpDeviceSnapshot
 └── routes[]
 ```
 
-Ein späterer echter SNMP-Collector soll genau dieses Objekt erzeugen. Dadurch ist dem restlichen Backend egal, ob die Daten aus einem echten Gerät oder aktuell aus einem Simulator stammen.
+Der implementierte FakeSnmpCollector erzeugt dieses Objekt. Durch die Trennung der Schichten wäre eine andere Datenquelle möglich, ist aber kein Bestandteil der abgeschlossenen Implementierung.
 
 ## 4. Datenbankstruktur
 
@@ -145,7 +145,7 @@ managed_devices
     └── 1:n events
 ```
 
-Foreign Keys verwenden `ON DELETE CASCADE`, damit abhängige SNMP-Daten automatisch entfernt werden, wenn ein Managed Device gelöscht wird.
+Die meisten SNMP-Fremdschlüssel verwenden `ON DELETE CASCADE`, damit zugehörige Daten beim Löschen eines Managed Device entfernt werden. Die Tabelle `users` ist noch im aktuellen SQL-Schema vorhanden, wird jedoch von keinem aktiven Benutzer-Workflow verwendet.
 
 ## 5. Repository-Schicht
 
@@ -195,7 +195,7 @@ Wichtige Operationen:
 
 ### EventRepository
 
-Events werden separat gespeichert und später unter anderem nach Gerät und Kritikalität abrufbar sein.
+Events werden separat gespeichert. Die API liefert die 50 neuesten Events insgesamt oder die 50 neuesten Events eines Geräts; eine Filterung nach Kritikalität ist nicht implementiert.
 
 ## 6. SnmpIngestService
 
@@ -206,12 +206,13 @@ Er erzeugt selbst keine SNMP-Daten und schreibt kein SQL.
 Sein Ablauf ist:
 
 ```text
-process_snapshot(snapshot)
+process_snapshot(snapshot, detect_events=True)
 
-1. Systemdaten upserten
-2. Interfaces ersetzen
-3. IP-Adressen ersetzen
-4. Routes ersetzen
+1. Sofern aktiviert: alten und neuen Zustand vergleichen, Events klassifizieren und speichern
+2. Systemdaten upserten
+3. Interfaces ersetzen
+4. IP-Adressen ersetzen
+5. Routes ersetzen
 ```
 
 Die Reihenfolge ist wichtig, da IP-Adressen und Routes auf Interfaces verweisen.
@@ -220,7 +221,7 @@ Der Service ist damit die Orchestrierungs-Schicht zwischen Collector und Reposit
 
 ## 7. FakeSnmpCollector
 
-Da zum aktuellen Entwicklungsstand noch keine echten Geräte dauerhaft angebunden werden können, wurde ein temporärer SNMP-Simulator gebaut.
+Für die Demonstration der abgeschlossenen Anwendung wurde ein Fake-SNMP-Collector implementiert. Ein realer SNMP-Poller ist in diesem Repository nicht vorhanden.
 
 Der Simulator:
 
@@ -234,12 +235,10 @@ Der Simulator:
 
 Damit kann die komplette Backend-Pipeline getestet werden, ohne von realer Hardware abhängig zu sein.
 
-Später wird nur der Simulator durch einen echten SNMP-Collector ersetzt. Der restliche Flow kann unverändert bleiben:
+Die Architektur trennt die Datenerfassung von der Verarbeitung. Ein echter Collector wäre eine denkbare Erweiterung, gehört aber nicht zum abgeschlossenen Umfang:
 
 ```text
-FakeSnmpCollector
-        ↓ später ersetzt durch
-RealSnmpCollector
+FakeSnmpCollector (implementiert)
         ↓
 SnmpDeviceSnapshot
         ↓
@@ -311,7 +310,7 @@ dem richtigen Interface zugeordnet.
 
 ## 10. API-Endpunkte
 
-Aktuell werden zwei zentrale Device-Endpunkte bereitgestellt.
+Für Geräte und Events sind folgende Read-Endpunkte im FastAPI-Backend implementiert.
 
 ### GET `/api/devices`
 
@@ -342,68 +341,47 @@ Liefert die vollständigen aktuellen Informationen zu einem Gerät:
 
 Das Frontend muss dadurch nicht mehrere Requests durchführen oder Daten selbst zusammensetzen.
 
-## 11. Events
+## 11. Events und Zustandsänderungen
 
-Die Event-Struktur ist bereits vorbereitet.
+Bei `SnmpIngestService.process_snapshot(..., detect_events=True)` vergleicht der `EventService` den bisherigen Datenbankzustand mit dem neuen Snapshot. Erkennt er Änderungen, entstehen `EventCandidate`-Objekte für:
 
-Ein Event enthält:
+- Interface operativ UP/DOWN und administrativ UP/DOWN
+- hinzugefügte oder entfernte IP-Adressen
+- hinzugefügte oder entfernte Routen
 
-- `id`
-- `device_id`
-- optional `interface_index`
-- `timestamp`
-- `severity`
-- `event_type`
-- `source`
-- `message`
+`SeverityClassifier` bewertet Kandidaten mit Ausgangswerten und Kontextregeln. Dazu zählen administrative Abschaltungen, entfernte Standardrouten und Routenverluste zusammen mit ausgefallenen Interfaces. Das Ergebnis wird als `EventCreate` im `EventRepository` gespeichert.
 
-Severity:
+Der Python-Code kennt die Schweregrade `info`, `low`, `warning`, `high` und `critical`. **Bekannte Abweichung:** Die CHECK-Constraint der mitgelieferten `schema.sql` erlaubt dagegen `info`, `warning`, `error` und `critical`. Diese Dokumentation beschreibt den Stand, behebt die Abweichung aber nicht.
 
-- `info`
-- `warning`
-- `error`
-- `critical`
+Die Event-Quelle im implementierten Simulator ist `snmp_poll`. In den Modellen sind außerdem `snmp_trap`, `syslog` und `system` als mögliche Quellen angelegt; eigenständige Trap- oder Syslog-Empfänger gehören nicht zur Implementierung.
 
-Event-Quellen:
+### Event-API
 
-- `snmp_poll`
-- `snmp_trap`
-- `syslog`
-- `system`
+- `GET /api/events` – die neuesten 50 Events, absteigend nach Zeit sortiert
+- `GET /api/devices/{device_id}/events` – die neuesten 50 Events für ein Gerät
 
-Geplant ist, später beim Einlesen eines neuen Snapshots Zustandsänderungen zu erkennen.
+### Weitere Endpunkte
 
-Beispiel:
+- `GET /api/health` – einfacher API-Health-Endpunkt
+- `GET /api/devices` – Geräteübersicht
+- `GET /api/devices/{device_id}` – Details zu einem Gerät, bei fehlender ID mit HTTP 404
+
+Die angegebenen `/api/...`-Pfade gelten für den Zugriff über Nginx auf Port 8081. Die definierten FastAPI-Routen selbst lauten `/health`, `/devices` und `/events` usw.
+
+## Abschlussstand
+
+Der umgesetzte Datenweg ist:
 
 ```text
-vorher:
-Interface oper_status = 1
-
-neuer Poll:
-Interface oper_status = 2
-
-→ Event:
-event_type = interface_down
-severity = warning / critical
+FakeSnmpCollector
+  → SnmpDeviceSnapshot
+  → SnmpIngestService
+  → EventService / SeverityClassifier (bei aktivierter Event-Erkennung)
+  → Repositories
+  → PostgreSQL
+  → Read-Services
+  → FastAPI-Responses
+  → Nginx / Frontend
 ```
 
-Events sollen später unter anderem über die API nach Kritikalität gefiltert werden können.
-
-## Aktueller Stand
-
-Die vollständige Test-Pipeline funktioniert bereits:
-
-```text
-Fake SNMP Daten
-→ Snapshot
-→ Ingest Service
-→ Repository
-→ PostgreSQL
-→ Read Service
-→ Response Schema
-→ FastAPI
-→ Swagger / Frontend
-```
-
-Der nächste geplante Schritt ist die Event-Erkennung anhand von Zustandsänderungen zwischen zwei SNMP-Polls.
-
+Der Collector wird als separates Python-Skript gestartet und nicht automatisch mit dem FastAPI-Server hochgefahren. Diese Beschreibung stellt den implementierten Stand dar, keine Roadmap.
